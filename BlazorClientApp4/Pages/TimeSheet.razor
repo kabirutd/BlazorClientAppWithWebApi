@@ -1,0 +1,105 @@
+﻿@page "/timesheet"
+@inject HttpClient Http
+
+<h1>Time Sheet</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (timesheetprojects == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Project</th>
+                <th>Proj Desc</th>
+                <th>Task</th>
+                <th>Task Desc</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var timesheetproject in timesheetprojects)
+            {
+                <tr>
+                    <td>@timesheetproject.proj</td>
+                    <td>@timesheetproject.proj_desc</td>
+                    <td>@timesheetproject.task_num</td>
+                    <td>@timesheetproject.task_desc</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <br/><br/>
+
+         <div class="container-fluid">
+
+             @foreach (var timesheetproject in timesheetprojects)
+             {
+
+                 {
+                     l = l + 1;
+                 }
+                 <div class="row">
+                     <div class="col-sm-4" style="font-size:medium">
+                         @timesheetproject.proj_desc - @timesheetproject.task_desc
+                     </div>
+
+                     @for (var j = 0; j < dayCount; j++)
+                     {
+                         <div class="col-sm-1">
+                             @*<div class="hour">*@
+                             <input class="hour timeField" name="hour-@l-@j" id="hour-@l-@j" style="width: 50%; text-align:center" />
+                             @*</div>*@
+                         </div>
+                     }
+
+
+
+
+
+                 </div>
+                 <hr>
+             }
+
+         </div>
+}
+
+@code {
+
+    TimeSheetProject[] timesheetprojects;
+
+    int dayCount = 7;
+    int l = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //forecasts = await Http.GetJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+
+        timesheetprojects = await Http.GetJsonAsync<TimeSheetProject[]>("http://pmo-api.luminatorusa.com/api/EmployeeProjectTask/LAP_PILOT2/mkabir/0");
+    }
+
+
+
+
+    public class TimeSheetProject
+    {
+        public string emp_num { get; set; }
+
+        public string userName { get; set; }
+
+        public string proj { get; set; }
+
+        public string proj_desc { get; set; }
+
+        public string proj_mgr { get; set; }
+
+        public string task_num { get; set; }
+
+        public string task_desc { get; set; }
+
+        //public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}
