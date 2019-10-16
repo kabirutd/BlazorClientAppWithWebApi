@@ -1,4 +1,7 @@
 ﻿@page "/timesheet"
+
+@using System.Globalization;
+
 @inject HttpClient Http
 
 <h1>Time Sheet</h1>
@@ -11,7 +14,7 @@
 }
 else
 {
-    <table class="table">
+    @*<table class="table">
         <thead>
             <tr>
                 <th>Project</th>
@@ -32,53 +35,390 @@ else
             }
         </tbody>
     </table>
-    <br/><br/>
+    <br />
+    <br />*@
 
-         <div class="container-fluid">
+    <div class="container-fluid">
 
-             @foreach (var timesheetproject in timesheetprojects)
-             {
+        <div class="card" style="font-family:Calibri,Lato; font-size:large;">
 
-                 {
-                     l = l + 1;
-                 }
-                 <div class="row">
-                     <div class="col-sm-4" style="font-size:medium">
-                         @timesheetproject.proj_desc - @timesheetproject.task_desc
-                     </div>
+            <!-----------------CARD HEADER---------------->
+            <div class="card-header">
+                <div class="row">
 
-                     @for (var j = 0; j < dayCount; j++)
-                     {
-                         <div class="col-sm-1">
-                             @*<div class="hour">*@
-                             <input class="hour timeField" name="hour-@l-@j" id="hour-@l-@j" style="width: 50%; text-align:center" />
-                             @*</div>*@
-                         </div>
-                     }
+                    <div class="col-sm-4">
 
 
+                        <span style="color: dodgerblue;"> <i class="fa fa-calendar" aria-hidden="true"></i></span>&nbsp;&nbsp;<strong><span style="color: Dodgerblue;">@*WEEKLY TIME SHEETS*@ @*@headerText*@ </span></strong>
+
+                    </div>
+                    <div class="col-sm-8">
+                        <button type="button" id="btnSave" disabled hidden class="btn btn-primary">Submit Timesheet</button>
+                        Hours: <span id="totalAmount2" ></span><input type="text" readonlye value="@totalHours" /><input type="text" readonlye bind="@totalHours" />
+                    </div>
+
+                </div>
+            </div>
+            <!-----------------ENDS CARD HEADER---------------->
+            <!------------------CARD BODY-------------------------------------->
+            <div class="card-body ">
+                <!------------------CARD BODY------------------->
+
+                <div class="row">
+
+                    <div class="col-sm-4">
+
+                        <span style="color: darkolivegreen"><strong>DATE RANGE:</strong></span>
+
+                    </div>
+                    <div class="col-sm-2">
+
+                        <input readonly name="weekend-date-picker-from" id="weekend-date-picker-from" style="width: 100%" />
+
+                    </div>
+
+                    <div class="col-sm-2">
+
+                        <input readonly name="weekend-date-picker-to" id="weekend-date-picker-to" style="width: 100%" />
+
+                    </div>
+
+                    @if (daysGoingBack != 0)
+                    {
+                        <div class="col-sm-1">
+                            <span style="font-size:14px;font-family:'Segoe UI'; font-weight:bold"><a href="">THIS WEEK</a></span>
+
+                        </div>
+                    }
+
+                    @if (daysGoingBack != -7)
+                    {
+                        <div class="col-sm-1">
+                            <i class="fa fa-arrow-circle-left" align="center"></i>&nbsp;<span style="font-size:14px;font-family:'Segoe UI'; font-weight:bold"><a href="">1 WEEK</a></span>
+
+                        </div>
+                    }
+
+                    @if (daysGoingBack != -14)
+                    {
+                        <div class="col-sm-1">
+
+                            <i class="fa fa-arrow-circle-left"></i>&nbsp;<span style="font-size:14px;font-family:'Segoe UI'; font-weight:bold"> <a href="">2 WEEKS</a></span>
+
+                        </div>
+                    }
+
+                    @if (daysGoingBack != -21)
+                    {
+                        <div class="col-sm-1">
+
+                            <i class="fa fa-arrow-circle-left"></i>&nbsp;<span style="font-size:14px;font-family:'Segoe UI'; font-weight:bold"><a href="">3 WEEKS </a></span>
+
+                        </div>
+                    }
+
+                </div>
+                <br />
+
+                <div class="row">
+
+                    <div class="col-sm-4">
+                        <strong>SELECT AN EMPLOYEE:</strong>
+                    </div>
+                    <div class="col-sm-8">
+
+                        <select id="employeesDropdown" name="employeesDropdown" style="width:300px;" required data-required-msg="Select an employee!" data-placeholder="SELECT AN EMPLOYEE!"></select>
+                    </div>
+
+                </div>
+
+                <br />
+
+                <div class="row">
+
+                    <div class="col-sm-4">
+
+                        <strong>SELECT A PROJECT:</strong>
+
+                    </div>
+                    <div class="col-sm-8">
+                        <input id="projectsDropdown" name="projectsDropdown" data-placeholder="All Projects" style="width: 300px" />
+                        &nbsp;&nbsp;&nbsp;
+                        <button type="button" id="btnLoadTasks" class="btn btn-small btn-success">Load Tasks</button>
+
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <!------------------DATE DIV ROW   make the date div fixed------------------>
+
+                <div style="" class="row scroller">
+
+
+                    <div class="col-sm-4">
+
+
+                        <span style="color: darkolivegreen"><strong>PROJECT TASKS</strong></span>
+
+
+                    </div>
+
+                    @for (var j = 1; j < dayCount2; j++)
+
+
+                    {
+                        <input type="hidden" id="date-@j" value="@arrDate[j]" />
+                        <div class="col-sm-1">
+
+                            <span style="color: darkolivegreen">
+                                @arrDate[j].DayOfWeek.ToString().Substring(0, 3).ToUpper()
+                            </span>
+                            <br />
+                            @String.Format("{0:MM/dd}", arrDate[j])
+
+                        </div>
+                    }
+
+                    <div class="col-sm-1" align="center">
+
+                        <strong>
+                            TASK <br />
+                            TOTAL
+                        </strong>
+
+                    </div>
+                </div>
+
+                <hr>
+                <!------------------ENDS DATE DIV ROW------------------->
+                <!--------------------------ANCHOR DIV------------------------------------->
+
+                <div class="scroller_anchor"></div>
+
+                <!--------------------------ENDS ANCHOR DIV--------------------------------->
+
+                @for (int l = 0; l < projectTaskCount2; l++)
+
+                {
+                    <!------------------DIV ROW------------------->
+
+                    <input type="hidden" class="taskid" id="task-@l" value="@taskids[l]" />
+                    <input type="hidden" class="projectid" id="project-@l" value="@projectids[l]" />
+
+
+                    <div class="row">
+
+
+                        <div class="col-sm-4" style="font-size:medium">
+
+                            @*<strong>@projects[l].ToString() - @projectTasks[l].ToString()</strong>*@
+                            <strong>@projectDescs[l].ToString() - @projectTasks[l].ToString()</strong>
+
+                        </div>
+
+                        @for (var j = 0; j < dayCount; j++)
+
+                        {
+
+                            <div class="col-sm-1">
+
+                                <div class="hour">
+                                    @*<input class="hour" name="hour-@j-@taskids[l]" id="hour-day-@j-task-@taskids[l]" style="width: 50%; text-align:center" />*@
+                                    <input class="hour timeField" name="hour-@l-@j" id="hour-@l-@j" style="width: 50%; text-align:center" onchange=""/>
+                                </div>
+
+                            </div>
+
+
+                        } <!------------for (var j = 0; j < dayCount; j++)--------------->
+                        <!-------------------TASK TOTAL------------------------->
+
+                        <div class="col-sm-1" align="center">
+
+                            @*<input type="text" readonly class="subtot" style="width: 50%; text-align:center" value="0" name="subtot-@l" id="subtot-@l" />*@
+                            <input type="text" readonly class="tasktotal" style="width: 60%; text-align:center" value="0" name="tasktotal-@l" id="tasktotal-@l" />
+
+                        </div>
+                        <!-------------------ENDS TASK TOTAL------------------------->
+
+                    </div>
+                    <hr>
+
+                    <!------------------ENDS DIV ROW------------------->
+                }
+                <!-------for (int l = 0; l < projectTaskCount2; l++)-------->
+
+                <div class="row">
+
+                    <div class="col-sm-4">
+
+                        <strong> DAILY TOTAL</strong>
+
+                    </div>
+
+                    @*<div class="col-sm-7">
+
+                            <button type="button" id="btnSave2" class="btn btn-primary">Submit Timesheet</button>
+
+                        </div>*@
+
+                    @for (var m = 0; m < dayCount; m++)
+
+                    {
+
+                        <div class="col-sm-1">
+                            <input type="text" readonly class="dailytotal" style="width: 60%; text-align:center" value="0" name="dailytotal-@m" id="dailytotal-@m" />
+                        </div>
+                    }
+
+                    <div class="col-sm-1" align="center" style="">
+                        <span id="totalamount"></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!------------------ENDS CARD BODY-------------------------------------->
+
+
+        </div>
+
+
+    </div>
 
 
 
-                 </div>
-                 <hr>
-             }
-
-         </div>
 }
 
-@code {
+@*@functions{
 
-    TimeSheetProject[] timesheetprojects;
 
-    int dayCount = 7;
-    int l = 0;
+}*@
+
+@functions {
+
+    static TimeSheetProject[] timesheetprojects;
+
+    static int dayCount = 7;
+    static int l = 0;
+
+    static int projectTaskCount2 = 0;
+    static int totalHours = 39;
+
+
+
+    //Date and Time Manipulation
+    //===================================================================
+    static int daysGoingBack = 0;   //get it from ViewData as params
+
+    static DateTime today = DateTime.Today.AddDays(daysGoingBack);  //today
+
+    static DateTime fromDate = Utility.GetFirstDayOfWeek(today, "Sunday");
+
+    static DateTime toDate = fromDate.AddDays(6);
+
+
+    static CultureInfo cul = CultureInfo.CurrentCulture;
+
+
+    int weekNum = cul.Calendar.GetWeekOfYear(today, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
+
+    //Calculate days based on from and todate
+    //======================================================
+
+    static TimeSpan ts = toDate - fromDate;
+
+    // Difference in days.
+
+    static int dayCount2 = ts.Days + 1; // This is in int
+
+    static DateTime[] arrDate = new DateTime[dayCount2]; //put dates in array
+
+    //static int k;
+
+    //fromDate
+
+    //arrDate[0] = fromDate;
+    static DateTime startDate = fromDate;
+
+    //for (int k = 1; k < 7; k++)
+    //{
+    //}
+
+    //for (var k=0; k<7>)
+
+    //for ( k = 1; k < dayCount2; k++)
+
+    //{
+    //    startDate = startDate.AddDays(1);
+    //    arrDate[k] = startDate;
+
+
+    //}
+
+
+    //=========================
+    static bool debug = true; //To Debug or not debug
+
+    //Get model data to pass into View
+    int n = 0;
+    static string emp_num = "";
+    decimal payRate = 0;
+    decimal projectRate = 0;
+
+    List<string> projectTasks = new List<string>();
+    List<string> projects = new List<string>();
+    List<string> projectDescs = new List<string>();
+    List<string> projectids = new List<string>();
+    List<string> taskids = new List<string>();
+
+    static void AddHours()
+    {
+        totalHours = 39;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         //forecasts = await Http.GetJsonAsync<WeatherForecast[]>("sample-data/weather.json");
 
+        
+
         timesheetprojects = await Http.GetJsonAsync<TimeSheetProject[]>("http://pmo-api.luminatorusa.com/api/EmployeeProjectTask/LAP_PILOT2/mkabir/0");
+
+        projectTaskCount2 = timesheetprojects.Count();
+
+        foreach (var item in timesheetprojects)
+        {
+            projectDescs.Add(item.proj_desc);
+            projects.Add(item.proj);
+            projectTasks.Add(item.task_desc);
+            projectids.Add(item.proj);
+            taskids.Add(item.task_num);
+            payRate = item.PayRate;
+            projectRate = item.ProjectRate;
+            emp_num = item.emp_num;
+            //ViewData["EmpNum"] = emp_num;
+            //ViewData["ManagerEmpNum"] = empManagerEmpNum;
+
+
+            n++;
+
+        }
+
+
+        for (int k = 1; k < dayCount2; k++)
+
+        {
+            startDate = startDate.AddDays(1);
+            arrDate[k] = startDate;
+
+
+        }
+
+        AddHours();
     }
 
 
@@ -99,6 +439,10 @@ else
         public string task_num { get; set; }
 
         public string task_desc { get; set; }
+
+        public decimal PayRate { get; set; }
+
+        public decimal ProjectRate { get; set; }
 
         //public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }

@@ -1,0 +1,87 @@
+﻿@page "/twowaydatabinding"
+
+
+    <div class="container-fluid">
+
+        <h5>Two Way Data Binding</h5>
+
+        @* You can bind using @Property or @Field *@
+
+        &nbsp;&nbsp;Using bind-value:event=oninput &nbsp;<input type="text" @bind-value="@Name" @bind-value:event="oninput" />
+        
+    
+        <br />
+
+        @*&nbsp;&nbsp;Using onchange &nbsp;<input type="text" @onchange="GetName" /><br /><br />
+
+        &nbsp;&nbsp;Using onkeyup &nbsp;<input type="text" @onkeyup="@GetName" />*@
+        @*&nbsp;&nbsp;Using onkeyup atname &nbsp;<input type="text" @onkeyup="@Name" />*@
+
+        &nbsp;&nbsp;Using ref &nbsp;@*<input type="text" @ref="@Name" />*@<br /><br />
+
+        @*&nbsp;&nbsp;Using onblur &nbsp;<input type="text" @onblur="SaveData()" />*@
+
+
+
+        <br />
+        <br />
+
+        @* Alternatively also using "Property" or "Field" *@
+        What is your age? &nbsp;<input type="number" @bind-value="@Age" @bind-value:event="oninput" /><br /><br />
+
+        @* Note how to pass a format for DateTime *@
+        What is your birthday (culture-invariant default format)? &nbsp;<input type="text" @bind-value="@Birthday"  @bind-value:event="oninput"  /><br /><br />
+        What is your birthday (German date format)? &nbsp;<input type="text" @bind-value="@Birthday"   @bind-value:format="yyyy/MM/dd"  /><br />
+
+        @* Data binding for checkboxes with boolean properties *@
+        Are you an administrator? &nbsp;<input type="checkbox" @bind="@IsAdmin" /><br /><br />
+
+        @* Data binding for selects with enums *@
+        <select id="select-box" @bind="@TypeOfEmployee">
+            <option value=@EmployeeType.Employee>@EmployeeType.Employee.ToString()</option>
+            <option value=@EmployeeType.Contractor>@EmployeeType.Contractor.ToString()</option>
+            <option value=@EmployeeType.Intern>@EmployeeType.Intern.ToString()</option>
+        </select>
+
+        @*
+        The following line would not work because decimal is not supported
+        What is your salery? &nbsp;<input type="number" @bind="Salary" /><br />
+        *@
+
+        <br />
+
+        <h2>Hello, @Name!</h2>
+
+        <p>You are @Age years old. You are born on the @Birthday. You are @TypeOfEmployee.</p>
+
+        @if (IsAdmin)
+        {
+            <p>You are an administrator!</p>
+        }
+
+
+    </div>
+
+
+@code {
+    private enum EmployeeType { Employee, Contractor, Intern };
+    private EmployeeType TypeOfEmployee { get; set; } = EmployeeType.Employee;
+
+    private string Name { get; set; } = "Mohammad Kabir";
+    private bool IsAdmin { get; set; } = true;
+    private int Age { get; set; } = 33;
+    public DateTime Birthday { get; set; } = DateTime.Today;
+
+    public decimal Salary { get; set; }
+
+    public void GetName()
+    {
+        Name = "Mohammad Sagir";
+    }
+
+    public void SaveData(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+}
